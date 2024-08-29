@@ -58,19 +58,19 @@ jobs:
 
     - name: Download Parquet file via FTP
       env:
-        FTP_HOST: ${{ secrets.FTP_HOST }}
+        FTP_SERVER: ${{ secrets.FTP_SERVER }}
         FTP_USER: ${{ secrets.FTP_USERNAME }}
         FTP_PASS: ${{ secrets.FTP_PASSWORD }}
       run: |
-        python ftp_operations.py download $FTP_HOST $FTP_USER $FTP_PASS /waldbrandgefahr/data/pipeline/fireweather_archive_warnregions.parquet fireweather_archive_warnregions.parquet
+        python ftp_operations.py download $FTP_SERVER $FTP_USER $FTP_PASS /waldbrandgefahr/data/pipeline/fireweather_archive_warnregions.parquet fireweather_archive_warnregions.parquet
 
     - name: Run update script
       run: python update_script.py
 
     - name: Upload updated file via FTP
       env:
-        FTP_HOST: ${{ secrets.FTP_HOST }}
+        FTP_SERVER: ${{ secrets.FTP_SERVER }}
         FTP_USER: ${{ secrets.FTP_USERNAME }}
         FTP_PASS: ${{ secrets.FTP_PASSWORD }}
       run: |
-        python ftp_operations.py upload $FTP_HOST $FTP_USER $FTP_PASS fireweather_archive_warnregions.parquet /waldbrandgefahr/data/pipeline/fireweather_archive_warnregions.parquet
+        python ftp_operations.py upload $FTP_SERVER $FTP_USER $FTP_PASS fireweather_archive_warnregions.parquet /waldbrandgefahr/data/pipeline/fireweather_archive_warnregions.parquet
