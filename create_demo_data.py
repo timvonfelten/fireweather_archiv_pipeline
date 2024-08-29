@@ -104,8 +104,9 @@ def create_sample_tifs(template_file, output_dir, start_date, num_days):
 
 # Beispielaufruf
 template_file = "demofile.tif"
-output_dir = "output"
+# output_dir = "output"
 start_date = str(datetime.now().strftime("%Y%m%d"))
+start_date = "20240825"
 print(start_date)
 num_days = 1
 

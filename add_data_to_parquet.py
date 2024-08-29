@@ -8,17 +8,15 @@ import os
 import geopandas as gpd
 from rasterio.features import rasterize
 from rasterio.enums import MergeAlg
-from concurrent.futures import ProcessPoolExecutor, as_completed
 
-# Entfernen Sie das Dictionary index_folders, da es nicht mehr benötigt wird
 def get_latest_date(parquet_file):
     table = pq.read_table(parquet_file)
     df = table.to_pandas()
-    return pd.to_datetime(df['date']).max().date()  # Konvertiere zu date-Objekt
+    return pd.to_datetime(df['date']).max().date()
 
 def process_date(date, region_masks, output_folder):
     date_str = date.strftime("%Y%m%d")
-    print(f"Verarbeite Datum: {date_str}")
+    print(f"Processing date: {date_str}")
     temp_data = []
 
     index_names = ['temperature', 'bui', 'dc', 'dmc', 'dsr', 'ffmc', 'fwi', 'gfmc', 'isi',
@@ -26,7 +24,7 @@ def process_date(date, region_masks, output_folder):
                    't_msl', 'wind_speed']
 
     for index_name in index_names:
-        file_path = os.path.join(output_folder, f"{index_name}{date_str}.tif")
+        file_path = os.path.join(output_folder, f"{index_name}{date.strftime('%Y%m%d')}.tif")
 
         if os.path.exists(file_path):
             with rasterio.open(file_path) as src:
@@ -42,7 +40,7 @@ def process_date(date, region_masks, output_folder):
                             'value': mean_value
                         })
         else:
-            print(f"Datei nicht gefunden: {file_path}")
+            print(f"File not found: {file_path}")
             for region_id in region_masks.keys():
                 temp_data.append({
                     'date': date_str,
@@ -71,21 +69,14 @@ def update_parquet_file(existing_file, new_data, new_file_path):
     # Combine existing and new data
     combined_df = pd.concat([existing_df, new_data], ignore_index=True)
 
-    # Remove duplicates based on date, region_id, and index_name
-    combined_df = combined_df.drop_duplicates(subset=['date', 'region_id', 'index_name'], keep='last')
+    # Remove duplicates based on date and region_id
+    combined_df = combined_df.drop_duplicates(subset=['date', 'region_id'], keep='last')
 
     # Sort the dataframe
-    combined_df = combined_df.sort_values(['date', 'region_id', 'index_name'])
-
-    # Pivot the dataframe
-    pivoted_df = combined_df.pivot_table(
-        values='value', 
-        index=['date', 'region_id'], 
-        columns='index_name'
-    ).reset_index()
+    combined_df = combined_df.sort_values(['date', 'region_id'])
 
     # Convert to PyArrow Table
-    table = pa.Table.from_pandas(pivoted_df)
+    table = pa.Table.from_pandas(combined_df)
 
     # Write the table with snappy compression
     pq.write_table(table, new_file_path, row_group_size=143*64, compression='snappy')
@@ -95,18 +86,18 @@ if __name__ == "__main__":
     output_folder = 'output'
     new_file_path = 'fireweather_archive_warnregions.parquet'
 
-    # Hole das neueste Datum aus der bestehenden Parquet-Datei
+    # Get the latest date from the existing Parquet file
     latest_date = get_latest_date(existing_parquet_file)
 
-    print(f"Neuestes Datum in der Parquet-Datei: {latest_date}")
+    print(f"Latest date in the Parquet file: {latest_date}")
 
-    # Setze das Startdatum für neue Daten (ein Tag nach dem neuesten Datum)
+    # Set the start date for new data (one day after the latest date)
     start_date = latest_date + timedelta(days=1)
 
-    # Setze das Enddatum (heute)
+    # Set the end date (today)
     end_date = datetime.now().date()
 
-    # Lesen der Forest Mask
+    # Read the Forest Mask
     forest_mask_path = 'data/waldmaske_mit_lichtenstein.tif'
     with rasterio.open(forest_mask_path) as src:
         forest_mask = src.read(1)
@@ -127,10 +118,10 @@ if __name__ == "__main__":
         )
         region_masks[region['region_id']] = region_mask & forest_mask
 
-    # Verarbeite neue Daten
+    # Process new data
     new_data = process_new_data(start_date, end_date, region_masks, output_folder)
 
-    # Aktualisiere die Parquet-Datei
+    # Update the Parquet file
     update_parquet_file(existing_parquet_file, new_data, new_file_path)
 
-    print(f"Aktualisierte Parquet-Datei wurde erstellt: {new_file_path}")
+    print(f"Updated Parquet file has been created: {new_file_path}")
