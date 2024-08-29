@@ -1,4 +1,3 @@
-data/
 export/
 output/
 *.parquet
