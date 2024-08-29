@@ -2,8 +2,8 @@ name: Daily Update and FTP Transfer
 
 on:
   schedule:
-    - cron: '0 1 * * *'  # Läuft jeden Tag um 1:00 UTC
-  workflow_dispatch:  # Ermöglicht manuelle Ausführung
+    - cron: '0 1 * * *'  # Runs every day at 1:00 UTC
+  workflow_dispatch:  # Allows manual execution
 
 jobs:
   update-and-transfer:
@@ -47,8 +47,8 @@ jobs:
             host = sys.argv[2]
             user = sys.argv[3]
             passwd = sys.argv[4]
-            remote_path = sys.argv[5]
-            local_path = sys.argv[6]
+            local_path = sys.argv[5]
+            remote_path = sys.argv[6]
             
             if operation == 'download':
                 ftp_download(host, user, passwd, remote_path, local_path)
@@ -62,9 +62,9 @@ jobs:
         FTP_USER: ${{ secrets.FTP_USERNAME }}
         FTP_PASS: ${{ secrets.FTP_PASSWORD }}
       run: |
-        python ftp_operations.py download $FTP_SERVER $FTP_USER $FTP_PASS /waldbrandgefahr/data/pipeline/fireweather_archive_warnregions.parquet fireweather_archive_warnregions.parquet
+        python ftp_operations.py download $FTP_SERVER $FTP_USER $FTP_PASS fireweather_archive_warnregions.parquet /waldbrandgefahr/data/pipeline/fireweather_archive_warnregions.parquet
 
-    - name: Run update script
+    - name: Create Demo Data
       run: python create_demo_data.py
 
     - name: Run update script
