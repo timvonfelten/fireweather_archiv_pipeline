@@ -3,6 +3,7 @@ import numpy as np
 from datetime import datetime, timedelta
 import os
 from scipy.interpolate import griddata
+import glob
 
 def create_hotspots(shape, num_hotspots):
     hotspots = []
@@ -104,10 +105,16 @@ def create_sample_tifs(template_file, output_dir, start_date, num_days):
 # Beispielaufruf
 template_file = "demofile.tif"
 output_dir = "output"
-start_date = "20210101"  # Format: YYYYMMDD
-num_days = 30
+start_date = str(datetime.now().strftime("%Y%m%d"))
+print(start_date)
+num_days = 1
 
 # Stelle sicher, dass das Ausgabeverzeichnis existiert
 os.makedirs(output_dir, exist_ok=True)
+
+# Remove all .tif files in the output directory
+tif_files = glob.glob(os.path.join(output_dir, "*.tif"))
+for file in tif_files:
+    os.remove(file)
 
 create_sample_tifs(template_file, output_dir, start_date, num_days)
