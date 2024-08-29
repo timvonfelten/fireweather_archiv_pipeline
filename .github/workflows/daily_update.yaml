@@ -22,7 +22,7 @@ jobs:
         pip install rasterio pandas numpy pyarrow geopandas
 
     - name: Run update script
-      run: python your_script_name.py
+      run: python add_data_to_parquet.py
       
     - name: Upload to FTP
       uses: SamKirkland/FTP-Deploy-Action@4.3.3
