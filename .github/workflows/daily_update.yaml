@@ -65,7 +65,7 @@ jobs:
         python ftp_operations.py download $FTP_SERVER $FTP_USER $FTP_PASS /waldbrandgefahr/data/pipeline/fireweather_archive_warnregions.parquet fireweather_archive_warnregions.parquet
 
     - name: Run update script
-      run: python update_script.py
+      run: python add_data_to_parquet.py
 
     - name: Upload updated file via FTP
       env:
