@@ -23,31 +23,26 @@ def process_date(date, region_masks, output_folder):
                    'mixr', 'precipitation', 'radiation', 'relative_humidity', 'sdmc',
                    't_msl', 'wind_speed']
 
-    for index_name in index_names:
-        file_path = os.path.join(output_folder, f"{index_name}{date.strftime('%Y%m%d')}.tif")
-
-        if os.path.exists(file_path):
-            with rasterio.open(file_path) as src:
-                band = src.read(1)
-                for region_id, region_mask in region_masks.items():
+    for region_id in region_masks.keys():
+        row_data = {'date': date_str, 'region_id': region_id}
+        for index_name in index_names:
+            file_path = os.path.join(output_folder, f"{index_name}{date.strftime('%Y%m%d')}.tif")
+            if os.path.exists(file_path):
+                with rasterio.open(file_path) as src:
+                    band = src.read(1)
+                    region_mask = region_masks[region_id]
                     masked_data = band[region_mask == 1]
                     if masked_data.size > 0:
                         mean_value = np.round(np.mean(masked_data), decimals=1)
-                        temp_data.append({
-                            'date': date_str,
-                            'region_id': region_id,
-                            'index_name': index_name,
-                            'value': mean_value
-                        })
-        else:
-            print(f"File not found: {file_path}")
-            for region_id in region_masks.keys():
-                temp_data.append({
-                    'date': date_str,
-                    'region_id': region_id,
-                    'index_name': index_name,
-                    'value': np.nan
-                })
+                        row_data[index_name] = mean_value
+                    else:
+                        row_data[index_name] = np.nan
+                # print(f"Processed: {file_path}")
+                # print(f"Value for region {region_id}, index {index_name}: {row_data[index_name]}")
+            else:
+                row_data[index_name] = np.nan
+                print(f"File not found: {file_path}")
+        temp_data.append(row_data)
 
     return temp_data
 
@@ -62,6 +57,7 @@ def process_new_data(start_date, end_date, region_masks, output_folder):
     return pd.DataFrame(all_data)
 
 def update_parquet_file(existing_file, new_data, new_file_path):
+    print(f"new data: {new_data}")
     # Read existing data
     existing_table = pq.read_table(existing_file)
     existing_df = existing_table.to_pandas()
@@ -80,6 +76,7 @@ def update_parquet_file(existing_file, new_data, new_file_path):
 
     # Write the table with snappy compression
     pq.write_table(table, new_file_path, row_group_size=143*64, compression='snappy')
+
 
 if __name__ == "__main__":
     existing_parquet_file = 'fireweather_archive_warnregions.parquet'

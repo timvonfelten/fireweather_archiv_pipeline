@@ -2,6 +2,7 @@ import pandas as pd
 
 # Load the parquet file into a dataframe
 df = pd.read_parquet('fireweather_archive_warnregions.parquet')
+# df = pd.read_parquet('modified_fireweather_archiv.parquet')
 
 
 # Display the head of the dataframe
