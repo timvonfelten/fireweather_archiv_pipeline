@@ -113,7 +113,7 @@ if __name__ == "__main__":
         transform = src.transform
 
     # Read the regions and create masks (assuming you have this data)
-    geojson_path = '/Users/timvonfelten/Library/Mobile Documents/com~apple~CloudDocs/05_Zivi/BAFU/Waldbrand_Index/Warnregionen/gefahren-waldbrand_warnung_2056.geojson'
+    geojson_path = 'data/gefahren-waldbrand_warnung_2056.geojson'
     regions = gpd.read_file(geojson_path)
     region_masks = {}
     for idx, region in regions.iterrows():
