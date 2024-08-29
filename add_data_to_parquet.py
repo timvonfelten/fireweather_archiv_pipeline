@@ -93,7 +93,7 @@ def update_parquet_file(existing_file, new_data, new_file_path):
 if __name__ == "__main__":
     existing_parquet_file = 'fireweather_archive_warnregions.parquet'
     output_folder = 'output'
-    new_file_path = 'updated_fireweather_archive_warnregions.parquet'
+    new_file_path = 'fireweather_archive_warnregions.parquet'
 
     # Hole das neueste Datum aus der bestehenden Parquet-Datei
     latest_date = get_latest_date(existing_parquet_file)
