@@ -1,8 +1,9 @@
 name: Daily Update and FTP Transfer
 
 on:
-  schedule:
-    - cron: '0 1 * * *'  # Runs every day at 1:00 UTC
+  # uncoment for daily run
+  #schedule:
+   # - cron: '0 1 * * *'  # Runs every day at 1:00 UTC
   workflow_dispatch:  # Allows manual execution
 
 jobs:
